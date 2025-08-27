@@ -5,4 +5,3 @@ console.assert(resta(5, 3) === 2, "Error en resta");
 
 console.log("✅ Todos los tests pasaron correctamente");
 
-// alejandro
