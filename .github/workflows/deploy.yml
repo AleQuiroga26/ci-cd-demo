@@ -8,6 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Paso 1: Configurar la clave SSH ED25519
       - name: Configurar clave SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
@@ -15,15 +16,16 @@ jobs:
           mkdir -p ~/.ssh
           printf "%s\n" "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519
 
+      # Paso 2: Conectarse al servidor y hacer git pull
       - name: Conectarse al servidor y hacer git pull
         env:
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
             cd ~/lemp-sites/nombre_apellido &&
             git pull origin main
           "
-
-
