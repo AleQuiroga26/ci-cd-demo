@@ -1,30 +1,26 @@
-name: Deploy via SSH
+name: CD - Deploy con Git Pull
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Configurar clave SSH
+      - name: Conectarse al servidor y hacer git pull
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
         run: |
+          # Configurar clave SSH
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name: Hacer git pull en servidor
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
+          # Conectarse y hacer git pull
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_IP "
             cd ~/lemp-sites/nombre_apellido &&
             git pull origin main
           "
-        env:
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_IP: ${{ secrets.SERVER_IP }}
